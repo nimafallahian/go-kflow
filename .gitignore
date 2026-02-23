@@ -1,0 +1,15 @@
+# Binaries
+bin/
+out/
+go-kflow
+
+# IDEs
+.idea/
+.vscode/
+
+# Testing
+*.test
+coverage.out
+
+# OS
+.DS_Store
