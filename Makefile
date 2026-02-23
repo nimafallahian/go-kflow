@@ -6,7 +6,7 @@ test:
 
 # Runs the linter
 lint:
-	golangci-lint run ./...
+	golangci-lint run --timeout=5m ./...
 
 # AI Hook: We leave this command for the AI to update the domain model 
 # based on the contract file.
