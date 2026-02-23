@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "🔍 Running golangci-lint..."
+if ! command -v golangci-lint >/dev/null 2>&1; then
+  echo "golangci-lint not found in PATH; skipping lint step."
+else
+  golangci-lint run --timeout=5m ./...
+fi
+
+echo "🧪 Running targeted go tests for changed packages..."
+
+# Find staged Go files (excluding vendor)
+changed_files="$(git diff --cached --name-only -- '*.go' | grep -v '^vendor/' || true)"
+
+if [[ -z "${changed_files}" ]]; then
+  # Fallback: run all tests if nothing staged (or non-Go changes only)
+  go test ./...
+  exit 0
+fi
+
+# Derive unique package directories from changed files
+packages=()
+while IFS= read -r file; do
+  dir="$(dirname "${file}")"
+  pkg="./${dir}"
+  packages+=("${pkg}")
+done <<< "${changed_files}"
+
+# De-duplicate package list
+unique_pkgs=($(printf "%s\n" "${packages[@]}" | sort -u))
+
+for pkg in "${unique_pkgs[@]}"; do
+  echo "  -> go test ${pkg}/..."
+  go test "${pkg}/..."
+done
+
+echo "✅ pre-commit checks passed."
+

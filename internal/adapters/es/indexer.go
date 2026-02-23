@@ -74,7 +74,9 @@ func (i *Indexer) Index(ctx context.Context, events []domain.MessageEvent) error
 	if err != nil {
 		return fmt.Errorf("bulk request: %w", err)
 	}
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if res.StatusCode == http.StatusConflict {
 		// 409 Conflict: idempotent conflict, ignore per policy.

@@ -75,7 +75,7 @@ func TestElasticsearchIndexerIndexesMessageEvent(t *testing.T) {
 
 	res, err := es.Get("messages", event.ID, es.Get.WithContext(ctx))
 	require.NoError(t, err)
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 
 	require.False(t, res.IsError(), "expected successful get, got status %s", res.Status())
 

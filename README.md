@@ -85,6 +85,23 @@ This uses `golangci-lint` with an increased timeout. In CI, the workflow builds 
 
 ---
 
+### Git pre-commit hook (lint + targeted tests)
+
+This repo ships a local git pre-commit hook in `.githooks/pre-commit` which:
+
+- Runs `golangci-lint` (if available on your `PATH`).
+- Runs `go test` **only** for packages that contain staged `.go` changes (and falls back to `go test ./...` if no Go files are staged).
+
+To enable it in your clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+After that, every `git commit` will automatically lint and run the most relevant tests for the code you’re touching.
+
+---
+
 ### How to run the service locally
 
 #### Directly with Go
