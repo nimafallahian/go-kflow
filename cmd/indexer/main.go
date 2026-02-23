@@ -4,9 +4,11 @@ import (
 	"context"
 	"log"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	elasticclient "github.com/elastic/go-elasticsearch/v8"
 	"golang.org/x/sync/errgroup"
@@ -27,7 +29,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	rootCtx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
 	kConsumer, err := kafkaadapter.NewConsumer(cfg.KafkaBrokers, cfg.KafkaTopic, cfg.KafkaGroupID)
@@ -57,9 +59,42 @@ func main() {
 
 	svc := service.NewIndexerService(kConsumer, indexer, cfg.WorkerCount)
 
-	g, ctx := errgroup.WithContext(ctx)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	httpServer := &http.Server{
+		Addr:         ":8080",
+		Handler:      mux,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+	}
+
+	g, ctx := errgroup.WithContext(rootCtx)
+
+	// Worker/service loop.
 	g.Go(func() error {
 		svc.Start(ctx)
+		return nil
+	})
+
+	// HTTP health server.
+	g.Go(func() error {
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			return err
+		}
+		return nil
+	})
+
+	// Graceful shutdown for HTTP server on context cancellation.
+	g.Go(func() error {
+		<-ctx.Done()
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := httpServer.Shutdown(shutdownCtx); err != nil {
+			logger.Error("http server shutdown error", "error", err)
+		}
 		return nil
 	})
 
