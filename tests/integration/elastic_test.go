@@ -29,10 +29,12 @@ func TestElasticsearchIndexerIndexesMessageEvent(t *testing.T) {
 		Image:        "docker.elastic.co/elasticsearch/elasticsearch:8.9.0",
 		ExposedPorts: []string{"9200/tcp"},
 		Env: map[string]string{
-			"discovery.type": "single-node",
-			// Keep defaults for username/password (elastic/changeme) if needed.
+			"discovery.type":        "single-node",
+			"xpack.security.enabled": "false",
 		},
-		WaitingFor: wait.ForListeningPort("9200/tcp").WithStartupTimeout(90 * time.Second),
+		WaitingFor: wait.ForHTTP("/_cluster/health").
+			WithPort("9200/tcp").
+			WithStartupTimeout(90 * time.Second),
 	}
 
 	esContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{

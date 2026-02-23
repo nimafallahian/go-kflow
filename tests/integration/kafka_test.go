@@ -63,6 +63,17 @@ func TestKafkaConsumerReadsMessageEvent(t *testing.T) {
 	const topic = "messages"
 	groupID := "test-group-consumer"
 
+	// Ensure topic exists before producing/consuming to avoid UNKNOWN_TOPIC_OR_PARTITION
+	adminConn, err := kafkago.Dial("tcp", kafkaBrokers[0])
+	require.NoError(t, err)
+	err = adminConn.CreateTopics(kafkago.TopicConfig{
+		Topic:             topic,
+		NumPartitions:     1,
+		ReplicationFactor: 1,
+	})
+	require.NoError(t, err)
+	require.NoError(t, adminConn.Close())
+
 	writer := &kafkago.Writer{
 		Addr:         kafkago.TCP(kafkaBrokers...),
 		Topic:        topic,
