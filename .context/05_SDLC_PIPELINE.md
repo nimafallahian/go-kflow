@@ -1,6 +1,7 @@
 # Policy: CI/CD & Deployment
 
 ## GitHub Actions
+- **Location**: `.github/workflows/` (e.g., `test.yml`).
 - **Pipeline 1 (Test)**: Runs `golangci-lint` and `go test` (including Testcontainers).
 - **Pipeline 2 (Build)**: Docker build with multi-stage. Base image `distroless/static`.
 - **Pipeline 3 (Deploy)**: Update image tag in `deployments/k8s/deployment.yaml`.
