@@ -1,0 +1,18 @@
+# AI Agent Operational Directives
+
+You are operating within the `go-kflow` codebase. Do not rely on generic Go knowledge; rely strictly on the project's internal documentation.
+
+## 1. The "Lazy Loading" Context Protocol
+Before writing or modifying any code, you must execute the following sequence:
+1. **Always read `.context/MAP.md` first.** This is your routing table.
+2. Based on the user's prompt, identify which specific subsystem you are working on (e.g., Domain, Kafka, ES, Tests).
+3. **Only read the specific `.context/` file(s)** related to that subsystem. Do not read the entire `.context/` directory at once to save context window.
+
+## 2. Execution Constraints
+- If the user asks for a feature, map that feature to the rules in the relevant `.context` file.
+- If a rule in a `.context` file dictates a specific pattern (e.g., goroutines, error wrapping, TDD), apply it silently. Do not explain the rule back to the user.
+- Ask for clarification if the requested feature conflicts with a documented policy.
+
+## 3. Output
+- Output only the requested code and tests.
+- Keep conversational filler to an absolute minimum.
