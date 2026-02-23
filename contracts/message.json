@@ -1,0 +1,11 @@
+{
+  "name": "OrderEvent",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "payload": { "type": "object" },
+    "metadata": { "type": "object", "additionalProperties": { "type": "string" } },
+    "status_code": { "type": "integer" }
+  },
+  "required": ["id", "payload", "status_code"]
+}

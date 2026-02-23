@@ -12,6 +12,8 @@
     - `es/`: Client implementation. Handles Bulk API logic and mapping.
 - `internal/service/`: The "Brain." It consumes from the port, applies domain logic, and sends to the indexer port.
 - `deployments/`: K8s manifests and Dockerfiles.
+- `contracts/`: Language-agnostic schemas (e.g., JSON Schema) defining the incoming data formats. `internal/domain/` structs must strictly mirror these contracts.
+- `Makefile`: Entry point for SDLC commands (`make test`, `make lint`, `make generate-domain`).
 - `tests/integration/`: End-to-end tests using Testcontainers.
 
 ## 3. The "Life of a Message" (Execution Flow)

@@ -12,3 +12,7 @@ Entry point for AI Context Engineering.
 ## Tooling Requirements
 - Language: Go 1.26
 - Libraries: `segmentio/kafka-go`, `elastic/go-elasticsearch/v8`, `testcontainers-go`, `testify`.
+
+## Contract-First Development
+- **Source of Truth:** All message models originate from the `contracts/` directory.
+- **Generation:** Do not manually invent domain fields. Read the corresponding contract file and implement the Go struct in `internal/domain/`.
